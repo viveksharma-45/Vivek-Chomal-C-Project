@@ -1,0 +1,175 @@
+//"University Management System"//
+
+#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+// 1. Basics of C++ library, variables, data I/O
+
+// 2. Structure
+struct Course {
+    int courseId;
+    string courseName;
+};
+
+// 3. Class, Object, Function Overloading
+class Student {
+private:
+    int id;
+    string name;
+    vector<Course> courses;
+
+public:
+    // 5. Constructors and Destructor
+    Student() { id = 0; name = "Unnamed"; }
+    Student(int id, string name) : id(id), name(name) {}
+    ~Student() {}
+
+    // 4. Dynamic Memory Allocation (adding courses dynamically)
+    void addCourse(int cid, string cname) {
+        courses.push_back({cid, cname});
+    }
+
+    // 3. Function Overloading
+    void display() {
+        cout << "Student ID: " << id << " Name: " << name << "\n";
+    }
+
+    void display(bool showCourses) {
+        display();
+        if (showCourses) {
+            cout << "Courses: \n";
+            for (auto &c : courses)
+                cout << " - " << c.courseId << ": " << c.courseName << "\n";
+        }
+    }
+
+    // 6. Friend Function
+    friend void showPrivateData(const Student &s);
+};
+
+void showPrivateData(const Student &s) {
+    cout << "[Friend Function] Private ID: " << s.id << " Name: " << s.name << "\n";
+}
+
+// 7. Constant Data Member, Static Member, Member Function
+class Faculty {
+public:
+    const int facultyCode; // constant data member
+    static int count;      // static data member
+    string facultyName;
+
+    Faculty(int fc, string fn) : facultyCode(fc), facultyName(fn) {
+        count++;
+    }
+
+    void show() const { // const member function
+        cout << "Faculty Code: " << facultyCode << " Name: " << facultyName << "\n";
+    }
+};
+int Faculty::count = 0;
+
+// 8. Inheritance, Function Overriding, Virtual Function
+class Person {
+public:
+    string name;
+    virtual void role() { cout << "Person Role\n"; }
+};
+
+class Admin : public Person {
+public:
+    void role() override { cout << "Admin manages system\n"; }
+};
+
+// 9. Operator Overloading
+class Marks {
+public:
+    int value;
+    Marks(int v = 0) : value(v) {}
+
+    Marks operator+(const Marks &m) {
+        return Marks(value + m.value);
+    }
+};
+
+// 10. Function Template
+
+template <typename T>
+T getMax(T a, T b) { return (a > b ? a : b); }
+
+// 10. Class Template
+
+template <class T>
+class Box {
+public:
+    T data;
+    Box(T d) : data(d) {}
+    void show() { cout << "Box: " << data << "\n"; }
+};
+
+// 11. Exception Handling
+void checkAttendance(int attendance) {
+    try {
+        if (attendance < 75)
+            throw "Short Attendance!";
+        cout << "Attendance OK!\n";
+    } catch (const char *msg) {
+        cout << "Exception: " << msg << "\n";
+    }
+}
+
+// 12. File Handling
+#include <fstream>
+void saveData(string text) {
+    ofstream file("university_data.txt");
+    file << text;
+    file.close();
+}
+
+// Main Program (University Management System Demo)
+int main() {
+    cout << "===== University Management System (C++ Project) =====\n\n";
+
+    // Student usage
+    Student s1(1, "Vivek");
+    s1.addCourse(101, "C++ Programming");
+    s1.addCourse(102, "Data Structures");
+    s1.display(true);
+    showPrivateData(s1);
+
+    cout << "\n";
+
+    // Faculty usage
+    Faculty f1(201, "Dr. Sharma");
+    f1.show();
+    cout << "Total Faculty: " << Faculty::count << "\n\n";
+
+    // Inheritance & Polymorphism
+    Person *p = new Admin();
+    p->role();
+    delete p;
+
+    cout << "\n";
+
+    // Operator Overloading
+    Marks m1(40), m2(50);
+    Marks m3 = m1 + m2;
+    cout << "Total Marks: " << m3.value << "\n\n";
+
+    // Templates
+    cout << "Max of 10 & 20: " << getMax(10, 20) << "\n";
+    Box<string> b1("Template Class Working");
+    b1.show();
+
+    cout << "\n";
+
+    // Exception Handling
+    checkAttendance(60);
+
+    // File Handling
+    saveData("University Management System Data Saved!");
+    cout << "Data saved to file successfully!\n";
+
+    return 0;
+}
