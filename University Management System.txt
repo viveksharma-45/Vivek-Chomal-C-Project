@@ -1,175 +1,187 @@
 //"University Management System"//
 
 #include <iostream>
-#include <string>
 #include <vector>
+#include <fstream>
 using namespace std;
 
-// 1. Basics of C++ library, variables, data I/O
-
-// 2. Structure
-struct Course {
-    int courseId;
-    string courseName;
+struct BasicInfo {
+    int id;
+    char name[30];
+    float marks;
 };
 
-// 3. Class, Object, Function Overloading
 class Student {
 private:
     int id;
     string name;
-    vector<Course> courses;
+    double cgpa;
+
+    static int totalStudents;   // Static member
+    const int createdNo;        // Const member
+
+    friend void updateCGPA(Student &s, double newCGPA);   // Friend Function
 
 public:
-    // 5. Constructors and Destructor
-    Student() { id = 0; name = "Unnamed"; }
-    Student(int id, string name) : id(id), name(name) {}
+    // Default Constructor
+    Student() : id(0), name("Unknown"), cgpa(0.0), createdNo(++totalStudents) {}
+
+    // Parameterized Constructor
+    Student(int i, string n, double c) : id(i), name(n), cgpa(c), createdNo(++totalStudents) {}
+
+    // Destructor
     ~Student() {}
 
-    // 4. Dynamic Memory Allocation (adding courses dynamically)
-    void addCourse(int cid, string cname) {
-        courses.push_back({cid, cname});
+    // Function Overloading
+    void setData(int i) { id = i; }
+    void setData(int i, string n) { id = i; name = n; }
+    void setData(int i, string n, double c) { id = i; name = n; cgpa = c; }
+
+    // Operator Overloading → Compare CGPA
+    bool operator>(const Student &other) {
+        return this->cgpa > other.cgpa;
     }
 
-    // 3. Function Overloading
-    void display() {
-        cout << "Student ID: " << id << " Name: " << name << "\n";
+    void display() const {
+        cout << "ID: " << id << " | Name: " << name << " | CGPA: " << cgpa << endl;
     }
 
-    void display(bool showCourses) {
-        display();
-        if (showCourses) {
-            cout << "Courses: \n";
-            for (auto &c : courses)
-                cout << " - " << c.courseId << ": " << c.courseName << "\n";
-        }
+    string toFile() const {
+        return to_string(id) + " " + name + " " + to_string(cgpa);
     }
-
-    // 6. Friend Function
-    friend void showPrivateData(const Student &s);
 };
 
-void showPrivateData(const Student &s) {
-    cout << "[Friend Function] Private ID: " << s.id << " Name: " << s.name << "\n";
+int Student::totalStudents = 0;
+
+
+/* ---------- FRIEND FUNCTION (Topic 6) ---------- */
+void updateCGPA(Student &s, double newCGPA) {
+    s.cgpa = newCGPA;
 }
 
-// 7. Constant Data Member, Static Member, Member Function
-class Faculty {
-public:
-    const int facultyCode; // constant data member
-    static int count;      // static data member
-    string facultyName;
-
-    Faculty(int fc, string fn) : facultyCode(fc), facultyName(fn) {
-        count++;
-    }
-
-    void show() const { // const member function
-        cout << "Faculty Code: " << facultyCode << " Name: " << facultyName << "\n";
-    }
-};
-int Faculty::count = 0;
-
-// 8. Inheritance, Function Overriding, Virtual Function
 class Person {
 public:
     string name;
-    virtual void role() { cout << "Person Role\n"; }
-};
 
-class Admin : public Person {
-public:
-    void role() override { cout << "Admin manages system\n"; }
-};
+    Person(string n = "XYZ") : name(n) {}
 
-// 9. Operator Overloading
-class Marks {
-public:
-    int value;
-    Marks(int v = 0) : value(v) {}
-
-    Marks operator+(const Marks &m) {
-        return Marks(value + m.value);
+    virtual void show() {
+        cout << "Person Name: " << name << endl;
     }
 };
 
-// 10. Function Template
+class Faculty : public Person {
+public:
+    string dept;
+
+    Faculty(string n, string d) : Person(n), dept(d) {}
+
+    void show() override {
+        cout << "Faculty: " << name << " | Dept: " << dept << endl;
+    }
+};
 
 template <typename T>
-T getMax(T a, T b) { return (a > b ? a : b); }
-
-// 10. Class Template
-
-template <class T>
-class Box {
-public:
-    T data;
-    Box(T d) : data(d) {}
-    void show() { cout << "Box: " << data << "\n"; }
-};
-
-// 11. Exception Handling
-void checkAttendance(int attendance) {
-    try {
-        if (attendance < 75)
-            throw "Short Attendance!";
-        cout << "Attendance OK!\n";
-    } catch (const char *msg) {
-        cout << "Exception: " << msg << "\n";
-    }
+T add(T a, T b) {
+    return a + b;
 }
 
-// 12. File Handling
-#include <fstream>
-void saveData(string text) {
-    ofstream file("university_data.txt");
-    file << text;
-    file.close();
-}
-
-// Main Program (University Management System Demo)
 int main() {
-    cout << "===== University Management System (C++ Project) =====\n\n";
+    vector<Student> students;
+    int choice;
 
-    // Student usage
-    Student s1(1, "Vivek");
-    s1.addCourse(101, "C++ Programming");
-    s1.addCourse(102, "Data Structures");
-    s1.display(true);
-    showPrivateData(s1);
+    while (true) {
+        cout << "\n===============================";
+        cout << "\n   UNIVERSITY MANAGEMENT SYSTEM";
+        cout << "\n===============================";
+        cout << "\n1. Add Student's";
+        cout << "\n2. Display All Students";
+        cout << "\n3. Update CGPA ";
+        cout << "\n4. Compare Students";
+        cout << "\n5. Faculty Detail";
+        cout << "\n6. Save Student's to File";
+        cout << "\n7. Display Fees";
+        cout << "\n8. Exit";
+        cout << "\nEnter choice: ";
+        cin >> choice;
 
-    cout << "\n";
+        try {
+            if (cin.fail()) throw "Invalid input!";
 
-    // Faculty usage
-    Faculty f1(201, "Dr. Sharma");
-    f1.show();
-    cout << "Total Faculty: " << Faculty::count << "\n\n";
+            if (choice == 1) {
+                int id; string name; double cgpa;
+                cout << "Enter ID: "; cin >> id;
+                cout << "Enter Name: "; cin >> name;
+                cout << "Enter CGPA: "; cin >> cgpa;
 
-    // Inheritance & Polymorphism
-    Person *p = new Admin();
-    p->role();
-    delete p;
+                Student s(id, name, cgpa);
+                students.push_back(s);
 
-    cout << "\n";
+                cout << "Student Added Successfully!\n";
+            }
 
-    // Operator Overloading
-    Marks m1(40), m2(50);
-    Marks m3 = m1 + m2;
-    cout << "Total Marks: " << m3.value << "\n\n";
+            else if (choice == 2) {
+                cout << "\n--- STUDENT LIST ---\n";
+                for (auto &s : students) s.display();
+            }
 
-    // Templates
-    cout << "Max of 10 & 20: " << getMax(10, 20) << "\n";
-    Box<string> b1("Template Class Working");
-    b1.show();
+            else if (choice == 3) {
+                int id;
+                double newCgpa;
+                cout << "Enter index to update (0-based): ";
+                cin >> id;
+                cout << "Enter new CGPA: ";
+                cin >> newCgpa;
 
-    cout << "\n";
+                if (id < 0 || id >= students.size()) throw "Invalid student index!";
+                
+                updateCGPA(students[id], newCgpa);
+                cout << "CGPA Updated!\n";
+            }
 
-    // Exception Handling
-    checkAttendance(60);
+            else if (choice == 4) {
+                if (students.size() < 2) {
+                    cout << "Need at least 2 students.\n";
+                } else {
+                    if (students[0] > students[1])
+                        cout << students[0].toFile() << " has higher CGPA.\n";
+                    else
+                        cout << students[1].toFile() << " has higher CGPA.\n";
+                }
+            }
 
-    // File Handling
-    saveData("University Management System Data Saved!");
-    cout << "Data saved to file successfully!\n";
+            else if (choice == 5) {
+                Faculty f("Mohnish Sir", "AI&DS");
+                f.show();
+            }
+
+            else if (choice == 6) {
+                ofstream fout("university_students.txt");
+                for (auto &s : students) fout << s.toFile() << endl;
+                fout.close();
+
+                cout << "Data Saved to university_students.txt\n";
+            }
+
+            else if (choice == 7) {
+                cout << "Total Fees: " << add<int>(10000, 8000) << endl;
+            }
+
+            else if (choice == 8) {
+                cout << "Exiting...\n";
+                break;
+            }
+
+            else {
+                throw "Invalid menu option!";
+            }
+
+        } catch (const char* msg) {
+            cout << "Error: " << msg << endl;
+            cin.clear();
+            cin.ignore(1000, '\n');
+        }
+    }
 
     return 0;
 }
